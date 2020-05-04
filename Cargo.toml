@@ -1,0 +1,27 @@
+[package]
+name = "iced_chive"
+version = "0.1.0"
+authors = ["Prashant Bhushan Singh <prashant.bhushansingh@gmail.com>"]
+edition = "2018"
+
+
+[dependencies]
+iced = { version = "0.1", features = ["image", "debug"] }
+iced_futures = { version = "0.1", features = ["tokio"] }
+iced_native = "0.2"
+tokio = { version = "0.2", features = ["time", "sync"] }
+
+rand = "0.7"
+log = "0.4"
+env_logger = "0.7"
+reqwest = { version = "*", features = ["cookies", "socks"]}
+scraper = "0.11"
+serde_json = "1.0"
+http = "0.2"
+lazy_static = "1.4"
+
+[profile.release]
+# debug = true
+lto = true
+opt-level = 'z'
+codegen-units = 1
