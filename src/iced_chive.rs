@@ -31,7 +31,7 @@ impl Application for IcedChive {
             IcedChive {
                 auto_play: true,
                 speed_state: slider::State::new(),
-                speed: 5.0,
+                speed: 2.5,
                 images: Vec::new(),
                 image: None,
                 title: String::from("Hello World!"),
@@ -59,8 +59,11 @@ impl Application for IcedChive {
             ChiveMessage::NativeEvent(Event::Keyboard(KeyEvent::CharacterReceived(_))) |
             ChiveMessage::NativeEvent(Event::Mouse(MouseEvent::ButtonPressed(MouseButton::Right))) |
             ChiveMessage::Next => {
-                info!("Total images left: {}", self.images.len());
-                return Command::from(read_file(self.images.pop()));
+                let image = self.images.pop();
+                image.as_ref().map(|img| img.file_name().map(|file| {
+                    self.title = format!("{} ({})", file.to_str().unwrap_or(""), self.images.len());
+                }));
+                return Command::from(read_file(image));
             }
             _ => {
                 // debug!("Ignoring message: {}", message)
@@ -146,6 +149,8 @@ impl Display for ChiveMessage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             ChiveMessage::LoadImages(images) => write!(f, "Images[{}]", images.len()),
+            ChiveMessage::ImageData(_) => write!(f, "ImageData"),
+            ChiveMessage::NativeEvent(_) => write!(f, "NativeEvent"),
             _ => write!(f, "{:?}", self)
         }
     }
