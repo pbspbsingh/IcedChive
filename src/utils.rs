@@ -55,15 +55,3 @@ fn match_ext(ext: &OsStr) -> bool {
     let ext = ext.to_str().unwrap_or("").to_lowercase();
     SUPPORTED_IMAGES.contains(&(&ext as &str))
 }
-
-pub async fn read_file(file: Option<PathBuf>) -> ChiveMessage {
-    if let Some(file) = file {
-        info!("Reading file: {:?}", file);
-        match tokio::fs::read(file).await {
-            Ok(content) => ChiveMessage::ImageData(content),
-            Err(err) => ChiveMessage::Error(err.to_string())
-        }
-    } else {
-        ChiveMessage::Error(String::from("Image path is none"))
-    }
-}

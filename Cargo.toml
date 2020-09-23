@@ -9,10 +9,10 @@ edition = "2018"
 log = "0.4"
 env_logger = "0.7"
 
-iced = { git="https://github.com/hecrj/iced.git", features = ["image", "debug", "tokio"] }
+tokio = { version = "0.2", features = ["time", "sync", "fs"] }
+iced = { git="https://github.com/hecrj/iced.git", features=["image", "debug", "tokio"] }
 iced_futures = { git="https://github.com/hecrj/iced.git" }
 iced_native = { git="https://github.com/hecrj/iced.git" }
-tokio = { version = "0.2", features = ["time", "sync", "fs"] }
 
 rand = "0.7"
 lazy_static = "1.4"
