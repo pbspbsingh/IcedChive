@@ -28,7 +28,7 @@ impl Application for IcedChive {
             IcedChive {
                 auto_play: false,
                 speed_state: slider::State::new(),
-                speed: 2.5,
+                speed: 20.,
                 images: Vec::new(),
                 image: None,
             },
@@ -65,7 +65,12 @@ impl Application for IcedChive {
                 // debug!("Ignoring message: {}", message)
             }
         };
-        Command::none()
+        if self.images.is_empty() && self.auto_play {
+            warn!("Images are empty, can't autoplay!");
+            Command::from(async { ChiveMessage::AutoPlay(false) })
+        } else {
+            Command::none()
+        }
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
@@ -73,9 +78,10 @@ impl Application for IcedChive {
         use iced::time::every;
 
         let mut subs = vec![subscription::events().map(ChiveMessage::NativeEvent)];
+        let wait = self.speed / 10.;
         if self.auto_play {
-            subs.push(every(Duration::from_secs_f32(self.speed)).map(|_| {
-                debug!("Loading next image...");
+            subs.push(every(Duration::from_secs_f32(wait)).map(move |_| {
+                debug!("Loading next image after waiting {:0.2}s", wait);
                 ChiveMessage::Next
             }));
         }
@@ -101,7 +107,7 @@ impl Application for IcedChive {
                             .max_width(250)
                             .spacing(10)
                             .push(Text::new("Speed"))
-                            .push(Slider::new(&mut self.speed_state, 0.5..=10., self.speed, ChiveMessage::Speed)),
+                            .push(Slider::new(&mut self.speed_state, 3.0..=100., self.speed, ChiveMessage::Speed)),
                     ),
             )
             .push(
