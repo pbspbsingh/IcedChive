@@ -17,6 +17,7 @@ iced_native = { git="https://github.com/hecrj/iced.git" }
 rand = "0.7"
 lazy_static = "1.4"
 anyhow = "1"
+trash = "1"
 
 [profile.release]
 lto = true

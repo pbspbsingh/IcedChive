@@ -1,8 +1,7 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-use iced::{Align, Application, Checkbox, Column, Command, Element, Image, Length, Row,
-           Slider, slider, Subscription, Text};
+use iced::{Align, Application, button, Button, Checkbox, Column, Command, Element, Image, Length, Row, Slider, slider, Subscription, Text};
 use iced_futures::executor;
 use iced_native::Event;
 use log::*;
@@ -13,6 +12,7 @@ pub struct IcedChive {
     auto_play: bool,
     speed_state: slider::State,
     speed: f32,
+    del_state: button::State,
     images: Vec<PathBuf>,
     image: Option<PathBuf>,
 }
@@ -29,6 +29,7 @@ impl Application for IcedChive {
                 auto_play: false,
                 speed_state: slider::State::new(),
                 speed: 20.,
+                del_state: button::State::new(),
                 images: Vec::new(),
                 image: None,
             },
@@ -55,6 +56,14 @@ impl Application for IcedChive {
             ChiveMessage::Error(msg) => error!("Error: {}", msg),
             ChiveMessage::AutoPlay(auto_play) => self.auto_play = auto_play,
             ChiveMessage::Speed(speed) => self.speed = speed,
+            ChiveMessage::Delete => {
+                if let Some(img) = &self.image {
+                    match trash::remove(img) {
+                        Ok(_) => info!("Deleted '{}'", img.to_string_lossy()),
+                        Err(e) => error!("Failed to delete '{}': {}", img.to_string_lossy(), e)
+                    };
+                }
+            }
             ChiveMessage::NativeEvent(Event::Keyboard(KeyEvent::CharacterReceived(_))) |
             ChiveMessage::NativeEvent(Event::Mouse(MouseEvent::ButtonPressed(MouseButton::Right))) |
             ChiveMessage::Next => {
@@ -107,7 +116,8 @@ impl Application for IcedChive {
                             .max_width(250)
                             .spacing(10)
                             .push(Text::new("Speed"))
-                            .push(Slider::new(&mut self.speed_state, 3.0..=100., self.speed, ChiveMessage::Speed)),
+                            .push(Slider::new(&mut self.speed_state, 3.0..=100., self.speed, ChiveMessage::Speed))
+                            .push(Button::new(&mut self.del_state, Text::new("Delete")).on_press(ChiveMessage::Delete)),
                     ),
             )
             .push(
@@ -126,6 +136,7 @@ pub enum ChiveMessage {
     Error(String),
     AutoPlay(bool),
     Speed(f32),
+    Delete,
     NativeEvent(iced_native::Event),
     Next,
 }
